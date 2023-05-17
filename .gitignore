@@ -1,0 +1,9 @@
+key.key
+*.log
+__pycache__/
+*.pyc
+*.exe
+*.o
+data.bin
+build
+dist

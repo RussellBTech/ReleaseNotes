@@ -1,0 +1,32 @@
+import requests
+from azure_devops_utils import create_headers, get_pull_requests, get_work_items
+from kirby import get_kirby_line
+
+def generate_release_notes_workitems(pat, orgUrl, repositoryNames):
+    headers = create_headers(pat)
+
+    for repository in repositoryNames:
+        pullRequests = get_pull_requests(orgUrl,repository, headers)
+
+        for pullRequest in pullRequests:
+            pullRequestId = pullRequest.get('pullRequestId', '')
+            if pullRequestId:
+                workItems = get_work_items(orgUrl, repository, pullRequestId, headers)
+                if workItems:
+                    return compose_release_notes(repository, pullRequestId, pullRequest, workItems, headers)
+    return f"<html><body><p>There were no work items associated with any of the pull requests for your repo.</p></body></html>"
+
+def compose_release_notes(orgUrl, repository, pullRequestId, pullRequest, workItems, headers):
+    releaseNotes = "<html><body>"
+    workItemApiUrl = f"{orgUrl}_apis/wit/workitems"
+    releaseNotes = f'<p style="color:blue;">&#9679; {repository} &#9679;</p> - Pull Request {pullRequestId}: {pullRequest["title"]}<br>'
+    releaseNotes += f'<p>{get_kirby_line()}</p>'
+    for workItem in workItems:
+        workItemUrl = f"{workItemApiUrl}/{workItem['id']}"
+        workItemDetail = requests.get(workItemUrl, headers=headers).json()
+        workItemTitle = workItemDetail['fields']['System.Title']
+        humanReadableWorkItemUrl = f"{orgUrl}/_workitems/edit/{workItem['id']}"
+        releaseNotes += f'- <a href="{humanReadableWorkItemUrl}">{workItem["id"]} - {workItemTitle}</a><br>'
+    releaseNotes += f'<p>{get_kirby_line()}</p><br>'    
+    releaseNotes += "</body></html>"
+    return releaseNotes
