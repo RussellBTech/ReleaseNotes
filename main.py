@@ -3,10 +3,6 @@ from gui import Application
 from encryption import save_encrypted_data
 import logging
 
-logging.basicConfig(filename='app.log', filemode='w',
-                    format='%(name)s - %(levelname)s - %(message)s')
-
-
 def main():
     root = tk.Tk()
     app = Application(master=root)

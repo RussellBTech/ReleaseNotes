@@ -37,10 +37,12 @@ def generate_release_notes(pat, orgUrl, projectName, repositoryNames):
         for pullRequest in pullRequestsTemp:
             pullRequestId = pullRequest.get('pullRequestId', '')
             if pullRequestId:
+                # Create pull request URL
+                pullRequestUrl = f"{orgUrl}/{projectName}/_git/{repository}/pullrequest/{pullRequestId}"
                 workItems = requests.get(
                     f"{pullRequestApiUrl}/{pullRequestId}/workitems", headers=headers).json().get('value', [])
                 if workItems:
-                    releaseNotes += f'<p style="color:blue;">&#9679; {repository} &#9679;</p> - Pull Request {pullRequestId}: {pullRequest["title"]}<br>'
+                    releaseNotes += f'<p style="color:blue;">&#9679; {repository} &#9679;</p> - <a href="{pullRequestUrl}">Pull Request {pullRequestId}: {pullRequest["title"]}</a><br>'
                     releaseNotes += f'<p>{get_kirby_line()}</p>'
                     for workItem in workItems:
                         if workItem['id'] not in workItemsDict:
