@@ -18,7 +18,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Create a rotating file handler
-handler = RotatingFileHandler(log_file, maxBytes=1600, backupCount=5)
+handler = RotatingFileHandler(log_file, maxBytes=5000, backupCount=5)
 
 # Create a logging format
 formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
