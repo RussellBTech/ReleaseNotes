@@ -1,4 +1,6 @@
+import datetime
 import tkinter as tk
+from tkcalendar import DateEntry
 
 from tkinter import messagebox
 from tkinter import ttk
@@ -17,6 +19,8 @@ class Application(tk.Frame):
         self.shared_pat = tk.StringVar()
         self.shared_org_url = tk.StringVar()
         self.current_tab_name = tk.StringVar()
+        # Initialize variable to hold the tkCalendar value
+        self.start_date = datetime.date.today()
         self.bound_functions = {}
         self.pack()
         self.create_widgets()
@@ -26,7 +30,7 @@ class Application(tk.Frame):
 
         # Set window icon
         self.master.iconbitmap(
-            r'C:/Users/RustyBurns/source/util-scripts/ReleaseNotes/assets/kirby.ico')
+            r'assets/kirby.ico')
 
         # Load the input values when the application is started
         self.get_input_values()
@@ -122,7 +126,7 @@ class Application(tk.Frame):
         # Run the script
         try:
             release_notes_file, error_message = generate_release_notes(
-                self.shared_pat.get(), self.shared_org_url.get(), project_name, repositoryNames)
+                self.shared_pat.get(), self.shared_org_url.get(), project_name, repositoryNames, self.start_date)
             if error_message != "":  # If there is an error message, show it in a dialog box
                 messagebox.showerror("Error", error_message)
             else:
@@ -270,6 +274,11 @@ class Application(tk.Frame):
         project_input.pack()
         project_input.insert(0, project_name)
 
+        date_label = tk.Label(frame, text="Start Date")
+        date_label.pack()
+        date_input = DateEntry(frame, width=12, background='darkblue', foreground='white', borderwidth=2)
+        date_input.pack(side="top", padx=5, pady=5)
+
         def update_project_name(event):
             tab_name = self.current_tab_name.get()
             old_project_name = self.projects[tab_name].project_name
@@ -284,7 +293,11 @@ class Application(tk.Frame):
                 project_input.delete(0, tk.END)
                 project_input.insert(0, old_project_name)
 
+        def update_start_date(event):
+            self.start_date = date_input.get_date()
+
         project_input.bind("<FocusOut>", update_project_name)
+        date_input.bind("<<DateEntrySelected>>", update_start_date)
 
     def create_repository_names_input(self, frame, repository_names):
         repo_label = tk.Label(
