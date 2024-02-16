@@ -19,6 +19,7 @@ class Application(tk.Frame):
         self.shared_pat = tk.StringVar()
         self.shared_org_url = tk.StringVar()
         self.current_tab_name = tk.StringVar()
+        
         # Initialize variable to hold the tkCalendar value
         self.start_date = datetime.date.today()
         self.bound_functions = {}
@@ -27,10 +28,6 @@ class Application(tk.Frame):
 
         # Set window title
         self.master.title("Kirby's Release Notes Generator")
-
-        # Set window icon
-        self.master.iconbitmap(
-            r'assets/kirby.ico')
 
         # Load the input values when the application is started
         self.get_input_values()

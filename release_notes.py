@@ -25,11 +25,12 @@ def generate_release_notes(pat, orgUrl, projectName, repositoryNames, startDate)
     # Get all work items in every repository for every pull request
     for repository in repositoryNames:
         pullRequestApiUrl = f"{baseApiUrl}/{repository}/pullRequests"
-        pullRequestsTemp = get_list(pat, f"{pullRequestApiUrl}?searchCriteria.targetRefName=refs/heads/master")
+        pullRequestsTemp = get_list(pat, f"{pullRequestApiUrl}?searchCriteria.status=completed&searchCriteria.targetRefName=refs/heads/master")
         if not pullRequestsTemp:
             # If pullRequestsTemp is empty, fetch the most recent completed pull request
-            pullRequestsTemp = get_list(pat, f"{pullRequestApiUrl}?searchCriteria.status=completed&searchCriteria.targetRefName=refs/heads/master&$top=10&$orderby=createdDate desc")
-            pullRequestsTemp = [pr for pr in pullRequestsTemp if datetime.strptime(pr['creationDate'][:10], '%Y-%m-%d').date() >= startDate]
+            pullRequestsTemp = get_list(pat, f"{pullRequestApiUrl}?searchCriteria.status=completed&searchCriteria.targetRefName=refs/heads/master&$orderby=createdDate desc")
+        
+        pullRequestsTemp = [pr for pr in pullRequestsTemp if datetime.strptime(pr['creationDate'][:10], '%Y-%m-%d').date() >= startDate]
 
         for pullRequest in pullRequestsTemp:
             pullRequestId = pullRequest.get('pullRequestId', '')
@@ -38,7 +39,7 @@ def generate_release_notes(pat, orgUrl, projectName, repositoryNames, startDate)
                 pullRequestUrl = f"{orgUrl}/{projectName}/_git/{repository}/pullrequest/{pullRequestId}"
                 workItems = get_list(pat, f"{pullRequestApiUrl}/{pullRequestId}/workitems")
                 if workItems:
-                    releaseNotes += f'<p style="color:blue;">&#9679; {repository} &#9679;</p> - <a href="{pullRequestUrl}">Pull Request {pullRequestId}: {pullRequest["title"]}</a><br>'
+                    releaseNotes += f'<p style="color:blue;">&#9679; {repository} &#9679;</p> - <a href="{pullRequestUrl}" target="_blank">Pull Request {pullRequestId}: {pullRequest["title"]}</a><br>'
                     releaseNotes += f'<p>{get_kirby_line()}</p>'
                     for workItem in workItems:
                         if workItem['id'] not in workItemsDict:
@@ -49,7 +50,7 @@ def generate_release_notes(pat, orgUrl, projectName, repositoryNames, startDate)
                             # Human readable URL
                             humanReadableWorkItemUrl = f"{orgUrl}/{projectName}/_workitems/edit/{workItem['id']}"
                             # Now, include the workItemId and the workItemTitle as part of the link
-                            releaseNotes += f'- <a href="{humanReadableWorkItemUrl}">{workItem["id"]} - {workItemTitle}</a><br>'
+                            releaseNotes += f'- <a href="{humanReadableWorkItemUrl}" target="_blank">{workItem["id"]} - {workItemTitle}</a><br>'
 
                     releaseNotes += f'<p>{get_kirby_line()}</p><br>'
 

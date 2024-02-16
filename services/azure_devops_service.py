@@ -40,4 +40,5 @@ def get_list(pat, url):
 def get_item(pat, url):
     headers = get_headers(pat)
     response = requests.get(url, headers=headers)
-    return response.json()
+    json = response.json()
+    return json
